@@ -1,7 +1,9 @@
-rm -rf infinit disk disk.img loopdev
-gcc -O2 -static src/**.c -o infinit
+#!/usr/bin/env bash
 
-dd if=/dev/zero of=disk.img bs=512 count=524288
+rm -rf infinit disk disk.img loopdev
+gcc -std=c99 -Wall -Wextra -Werror -O2 -static src/**.c -o infinit
+
+dd if=/dev/zero of=disk.img bs=1M count=64
 parted -s disk.img mklabel msdos
 parted -s disk.img mkpart primary 2048s 100%
 sudo losetup -Pf disk.img --show > loopdev
@@ -14,4 +16,4 @@ sudo umount disk
 sudo losetup -d `cat loopdev`
 rm -rf disk loopdev
 
-qemu-system-x86_64 -kernel vmlinuz-5.16.13 -append "root=/dev/sda1 init=infinit selinux=0" -hda disk.img
+qemu-system-x86_64 -m 512M -M q35 -kernel vmlinuz-5.16.13 -append "root=/dev/sda1 init=infinit selinux=0" -hda disk.img
