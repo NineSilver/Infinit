@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 rm -rf infinit disk disk.img loopdev
-gcc -std=c99 -Wall -Wextra -Werror -O2 -static src/**.c -o infinit
+gcc -std=gnu99 -Wall -Wextra -Werror -O2 -static src/**.c -o infinit
 
 dd if=/dev/zero of=disk.img bs=1M count=64
 parted -s disk.img mklabel msdos
