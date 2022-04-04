@@ -21,4 +21,9 @@ void infinit_log(enum loglevel level, const char* msg, ...);
     infinit_log(LOG_ERROR, "fatal. " msg, ## __VA_ARGS__);  \
     for(;;);
 
+
+// Process spawning
+
+int spawn(char* argv[]);
+
 #endif /* !__INFINIT__UTIL_H */

@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
 
     sig_init();
 
+    fs_mount_everything();
+
     for(;;);
     return 0;
 }

@@ -1,8 +1,13 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <sysexits.h>
 #include <unistd.h>
 
+#include "sig.h"
 #include "util.h"
 
 // Colors uwu
@@ -40,4 +45,28 @@ void infinit_log(enum loglevel level, const char* msg, ...)
     va_end(ap);
 
     putchar('\n');
+}
+
+int spawn(char* argv[])
+{
+    pid_t pid = fork();
+
+    if(pid == 0)
+    {
+        setsid();
+        sig_defaults();
+
+        execvp(argv[0], argv);
+        exit(EX_OSERR);
+    }
+    else
+    {
+        return -1;
+    }
+
+    int status;
+    if(waitpid(pid, &status, 0) == -1)
+        return 1;
+    
+    return WEXITSTATUS(status);
 }

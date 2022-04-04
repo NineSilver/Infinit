@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fstab.h>
 #include <mntent.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,4 +59,45 @@ void fs_mount_early(void)
     mount_if_notmount("proc", "/proc", "proc", 0, NULL);
 	mount_if_notmount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
 	mount_if_notmount("sysfs", "/sys", "sysfs", 0, NULL);
+}
+
+static void fs_remount_root(void)
+{
+    if(!setfsent())
+    {
+        panic("fstab not loaded (%s); boot cannot continue.", strerror(errno))
+    }
+
+    struct fstab* fs;
+    while((fs = getfsent()))
+    {
+        if(!strcmp(fs->fs_file, "/"))
+            break;
+    }
+
+    char* tok, *s = fs->fs_mntops;
+    while((tok = strtok(s, ",")))
+    {
+        if(!strcmp(tok, "ro"))
+        {
+            endfsent();
+            return;
+        }
+
+        s = NULL;
+    }
+
+    int rc = spawn((char*[]){"mount", "-n", "-o", "remount,rw", "/", NULL});
+    if(rc > 0)
+    {
+        panic("unable to mount root as read-write: %s.")
+    }
+
+    endfsent();
+}
+
+void fs_mount_everything(void)
+{
+    fs_remount_root();
+    
 }
